@@ -1,0 +1,21 @@
+{
+  "name": "WASM Memory Tools",
+  "description": "Inspect and manipulate WebAssembly memory at runtime.",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "permissions": ["scripting", "storage", "activeTab"], 
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "devtools_page": "devtools.html",
+  "action": {
+    "default_icon": {
+      "16": "res/icon16.png",
+      "48": "res/icon48.png",
+      "64": "res/icon64.png",
+      "128": "res/icon128.png"
+    },
+    "default_title": "WASM Memory Tools"
+  }
+}

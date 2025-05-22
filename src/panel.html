@@ -1,0 +1,79 @@
+<!-- panel.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>WASM Memory Tools</title>
+    <script src="panel.js"></script>
+    <link rel="stylesheet" href="../res/css/pico.min.css" />
+    <style>
+      .compact {
+        font-size: 0.65rem !important;
+        padding: 0.2rem 0.4rem !important;
+        line-height: 1 !important;
+        height: 1.1rem !important;
+        width: auto !important;
+      }
+
+      /* Pour forcer la hauteur minimale sur input/button (parfois utile avec Pico) */
+      input.compact,
+      button.compact,
+      select.compact,
+      label.compact,
+      textarea.compact {
+        min-height: unset !important;
+      }
+    </style>
+  </head>
+<body>
+  <main class="container">
+    <!-- Message d'erreur -->
+    <article id="msg-err" class="contrast" style="display: none;">
+      <h4>🚫 No WASM memory found on this page</h4>
+      <p>This page does not seem to use WebAssembly.</p>
+    </article>
+
+    <section id="main-content">
+
+      <div class="grid">
+
+        <form>
+          <fieldset>
+            <legend><strong>Read Memory</strong></legend>
+
+            <label for="addr"  class="compact">
+              Read from address:
+              <input id="addr" class="compact" type="number" value="0" />
+            </label>
+
+            <label for="length"  class="compact">
+              Length:
+              <input id="length" class="compact" type="number" value="8" />
+            </label>
+
+            <label for="btn-read"  class="compact"><button id="btn-read" class="compact" type="button">Read Bytes</button></label>
+          </fieldset>
+
+          <fieldset>
+            <legend><strong>Write Memory</strong></legend>
+
+            <label for="w-addr"  class="compact">
+              Write at address:
+              <input id="w-addr" class="compact" type="number" value="0" />
+            </label>
+
+            <label for="btn-write"  class="compact"><button id="btn-write" class="compact" type="button">Write Bytes</button></label>
+            
+          </fieldset>
+        </form>
+
+        <div>
+          <label for="output"><strong>Output:</strong></label>
+          <pre id="output" style="min-height: 150px; background-color: var(--muted-color); padding: 0.5rem;"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+
+</html>
