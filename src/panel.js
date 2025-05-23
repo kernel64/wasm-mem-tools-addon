@@ -23,6 +23,28 @@ document.addEventListener("DOMContentLoaded", function (event) {
   );
 
 
+
+  document.getElementById("btn-write").onclick = () => {
+
+    const addrRead = parseInt(document.getElementById("addr").value);
+    const len = parseInt(document.getElementById("length").value);
+    const addrWrite = parseInt(document.getElementById("w-addr").value);
+
+    console.log("Copy data from " + addrRead +" to memory " + addrWrite);
+    chrome.devtools.inspectedWindow.eval(
+      `window.memWrapper.writeBytes(${addrWrite}, window.memWrapper.readBytes(${addrRead}, ${len}))`,
+      (result, exceptionInfo) => {
+        if (exceptionInfo) {
+          document.getElementById(
+            "output"
+          ).textContent = `Error: ${exceptionInfo.value}`;
+        } else {
+          document.getElementById("output").textContent = "";
+        }
+      }
+    );
+  };
+
   document.getElementById("btn-read").onclick = () => {
     const addr = parseInt(document.getElementById("addr").value);
     const len = parseInt(document.getElementById("length").value);
