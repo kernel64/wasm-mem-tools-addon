@@ -9,6 +9,12 @@
     "service_worker": "src/background.js"
   },
   "devtools_page": "devtools.html",
+  "icons": {
+      "16": "res/icon16.png",
+      "48": "res/icon48.png",
+      "64": "res/icon64.png",
+      "128": "res/icon128.png"
+  },
   "action": {
     "default_icon": {
       "16": "res/icon16.png",
