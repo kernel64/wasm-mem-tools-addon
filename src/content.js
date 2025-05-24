@@ -1,6 +1,6 @@
 try {
     if (typeof wasmMemory !== 'undefined' && wasmMemory instanceof WebAssembly.Memory) {
-        window.memWrapper = new memoryWrapper(wasmMemory.buffer);
+        window.memWrapper = new MemoryWrapper(wasmMemory.buffer);
 
         console.log("[WASM Memory Tools] WASM memory found and wrapper initialized.");
     } else {

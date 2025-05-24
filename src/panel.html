@@ -1,79 +1,165 @@
-<!-- panel.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>WASM Memory Tools</title>
-    <script src="panel.js"></script>
-    <link rel="stylesheet" href="../res/css/pico.min.css" />
+    <title>WASM Memory Panel</title>
     <style>
-      .compact {
-        font-size: 0.65rem !important;
-        padding: 0.2rem 0.4rem !important;
-        line-height: 1 !important;
-        height: 1.1rem !important;
-        width: auto !important;
+      body {
+        font-family: sans-serif;
+        padding: 1rem;
       }
-
-      /* Pour forcer la hauteur minimale sur input/button (parfois utile avec Pico) */
-      input.compact,
-      button.compact,
-      select.compact,
-      label.compact,
-      textarea.compact {
-        min-height: unset !important;
+      section {
+        border: 1px solid #ccc;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      label {
+        display: block;
+        margin-top: 0.5rem;
+      }
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+      }
+      button {
+        margin-top: 1rem;
+      }
+      pre {
+        background: #f3f3f3;
+        padding: 0.5rem;
+      }
+      .partition {
+        float: left;
+        width: 30%;
+        padding: 1rem;
       }
     </style>
+    <script src="panel.js"></script>
   </head>
-<body>
-  <main class="container">
-    <!-- Message d'erreur -->
-    <article id="msg-err" class="contrast" style="display: none;">
+  <body>
+    <div style="position: absolute; top: 10px; right: 10px">
+      <a
+        href="https://github.com/kernel64/wasm-mem-tools-addon"
+        target="_blank"
+        title="View on GitHub"
+      >
+        <img
+          src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          alt="GitHub"
+          width="24"
+          height="24"
+          style="vertical-align: middle"
+        />
+      </a>
+    </div>
+
+    <h1>
+      <img src="../res/icon48.png" alt="Logo" style="height: 32px; vertical-align: middle; margin-right: 10px;">
+      WASM Memory Toolkit
+      <span style="font-size: 0.5em; font-weight: normal"
+        >by
+        <a target="_blank" href="https://mabslabs.com">mabslabs.com</a></span
+      >
+    </h1>
+
+    <section id="msg-err" class="contrast" style="display: none">
       <h4>🚫 No WASM memory found on this page</h4>
       <p>This page does not seem to use WebAssembly.</p>
-    </article>
-
-    <section id="main-content">
-
-      <div class="grid">
-
-        <form>
-          <fieldset>
-            <legend><strong>Read Memory</strong></legend>
-
-            <label for="addr"  class="compact">
-              Read from address:
-              <input id="addr" class="compact" type="number" value="0" />
-            </label>
-
-            <label for="length"  class="compact">
-              Length:
-              <input id="length" class="compact" type="number" value="8" />
-            </label>
-
-            <label for="btn-read"  class="compact"><button id="btn-read" class="compact" type="button">Read Bytes</button></label>
-          </fieldset>
-
-          <fieldset>
-            <legend><strong>Write Memory</strong></legend>
-
-            <label for="w-addr"  class="compact">
-              Write at address:
-              <input id="w-addr" class="compact" type="number" value="0" />
-            </label>
-
-            <label for="btn-write"  class="compact"><button id="btn-write" class="compact" type="button">Write Bytes</button></label>
-            
-          </fieldset>
-        </form>
-
-        <div>
-          <label for="output"><strong>Output:</strong></label>
-          <pre id="output" style="min-height: 150px; background-color: var(--muted-color); padding: 0.5rem;"></pre>
-        </div>
-      </div>
     </section>
-  </main>
-</body>
 
+    <div class="partition">
+      <!-- Memory Read -->
+      <section>
+        <h2>Read Memory</h2>
+        <label
+          >Address (decimal or hex): <input type="text" id="readAddress"
+        /></label>
+        <label
+          >Type:
+          <select id="readType">
+            <option value="read8bitsUnsigned">Uint8</option>
+            <option value="read8bitsSigned">Int8</option>
+            <option value="read16bitsUnsigned">Uint16</option>
+            <option value="read16bitsSigned">Int16</option>
+            <option value="read32bitsUnsigned">Uint32</option>
+            <option value="read32bitsSigned">Int32</option>
+            <option value="read64bitsUnsigned">Uint64</option>
+            <option value="read64bitsSigned">Int64</option>
+            <option value="readFloat32">Float32</option>
+            <option value="readFloat64">Float64</option>
+          </select>
+        </label>
+        <button id="readMemoryBtn">Read</button>
+        <pre id="readResult"></pre>
+      </section>
+
+      <!-- Memory Write -->
+      <section>
+        <h2>Write Memory</h2>
+        <label>Address: <input type="text" id="writeAddress" /></label>
+        <label
+          >Type:
+          <select id="writeType">
+            <option value="write8bitsUnsigned">Uint8</option>
+            <option value="write8bitsSigned">Int8</option>
+            <option value="write16bitsUnsigned">Uint16</option>
+            <option value="write16bitsSigned">Int16</option>
+            <option value="write32bitsUnsigned">Uint32</option>
+            <option value="write32bitsSigned">Int32</option>
+            <option value="write64bitsUnsigned">Uint64</option>
+            <option value="write64bitsSigned">Int64</option>
+            <option value="writeFloat32">Float32</option>
+            <option value="writeFloat64">Float64</option>
+          </select>
+        </label>
+        <label>Value: <input type="text" id="writeValue" /></label>
+        <button id="writeMemoryBtn">Write</button>
+        <pre id="writeResult"></pre>
+      </section>
+    </div>
+
+    <div class="partition">
+      <!-- String Read/Write -->
+      <section>
+        <h2>Read/Write String</h2>
+        <label>Address: <input type="text" id="stringAddress" /></label>
+        <label
+          >String (for write): <input type="text" id="stringValue"
+        /></label>
+        <button id="readStringBtn">Read String</button>
+        <button id="writeStringBtn">Write String</button>
+        <pre id="stringOutput"></pre>
+      </section>
+
+      <!-- Copy Memory -->
+      <section>
+        <h2>Copy Memory</h2>
+        <label>Source Address: <input type="text" id="copySrc" /></label>
+        <label>Target Address: <input type="text" id="copyDst" /></label>
+        <label>Length (bytes): <input type="number" id="copyLen" /></label>
+        <button id="copyMemoryBtn">Copy</button>
+        <pre id="copyOutput"></pre>
+      </section>
+    </div>
+
+    <div class="partition">
+      <!-- Search -->
+      <section>
+        <h2>Search</h2>
+        <label>Value to search: <input type="text" id="searchValue" /></label>
+        <label
+          >Type:
+          <select id="searchType">
+            <option value="search8bitsUnsigned">Uint8</option>
+            <option value="search32bitsUnsigned">Uint32</option>
+            <option value="searchFloat32">Float32</option>
+            <option value="searchString">Exact String</option>
+            <option value="searchStringRegex">Regex String</option>
+          </select>
+        </label>
+        <button id="searchMemoryBtn">Search</button>
+        <pre id="searchOutput"></pre>
+      </section>
+    </div>
+  </body>
 </html>

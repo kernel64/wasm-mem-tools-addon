@@ -1,78 +1,189 @@
 document.addEventListener("DOMContentLoaded", function (event) {
-
-  const mainContent = document.getElementById("main-content");
   const msgErr = document.getElementById("msg-err");
 
-    chrome.devtools.inspectedWindow.eval(
+  chrome.devtools.inspectedWindow.eval(
     "typeof wasmMemory !== 'undefined' && wasmMemory instanceof WebAssembly.Memory",
     function (result, exceptionInfo) {
       if (exceptionInfo) {
-        mainContent.style.display = "none";
         msgErr.style.display = "block";
+        document.querySelectorAll(".partition").forEach((el) => {
+          el.style.display = "none";
+        });
         return;
       }
-
       if (result) {
         msgErr.style.display = "none";
-        mainContent.style.display = "block";
+        document.querySelectorAll(".partition").forEach((el) => {
+          el.style.display = "block";
+        });
       } else {
-        mainContent.style.display = "none";
         msgErr.style.display = "block";
+        document.querySelectorAll(".partition").forEach((el) => {
+          el.style.display = "none";
+        });
       }
     }
   );
 
+  function parseAddress(addrStr) {
+    return addrStr.startsWith("0x") ? parseInt(addrStr, 16) : parseInt(addrStr);
+  }
 
+  document.getElementById("readMemoryBtn").onclick = () => {
+    const addr = parseAddress(document.getElementById("readAddress").value);
+    const typefunction = document.getElementById("readType").value;
 
-  document.getElementById("btn-write").onclick = () => {
-
-    const addrRead = parseInt(document.getElementById("addr").value);
-    const len = parseInt(document.getElementById("length").value);
-    const addrWrite = parseInt(document.getElementById("w-addr").value);
-
-    console.log("Copy data from " + addrRead +" to memory " + addrWrite);
-    chrome.devtools.inspectedWindow.eval(
-      `window.memWrapper.writeBytes(${addrWrite}, window.memWrapper.readBytes(${addrRead}, ${len}))`,
-      (result, exceptionInfo) => {
-        if (exceptionInfo) {
-          document.getElementById(
-            "output"
-          ).textContent = `Error: ${exceptionInfo.value}`;
-        } else {
-          document.getElementById("output").textContent = "";
+    try {
+      chrome.devtools.inspectedWindow.eval(
+        `window.memWrapper.${typefunction}(${addr})`,
+        (result, exceptionInfo) => {
+          if (exceptionInfo) {
+            document.getElementById(
+              "readResult"
+            ).textContent = `Error: ${exceptionInfo.value}`;
+          } else {
+            document.getElementById(
+              "readResult"
+            ).textContent = `DEC: ${result}\nHEX: ${result.toString(
+              16
+            )}\nCHAR: ${String.fromCharCode(Number(result))}`;
+          }
         }
-      }
-    );
+      );
+    } catch (e) {
+      document.getElementById("readResult").textContent = `Error: ${e.message}`;
+    }
   };
 
-  document.getElementById("btn-read").onclick = () => {
-    const addr = parseInt(document.getElementById("addr").value);
-    const len = parseInt(document.getElementById("length").value);
-    console.log("reading memory from " + addr);
-    chrome.devtools.inspectedWindow.eval(
-      `window.memWrapper.readBytes(${addr}, ${len})`,
-      (result, exceptionInfo) => {
-        if (exceptionInfo) {
-          document.getElementById(
-            "output"
-          ).textContent = `Error: ${exceptionInfo.value}`;
-        } else {
-          const padded = result.map((v) => {
-            const dec = v.toString().padStart(3, " ");
-            const hex = (v.toString(16).toUpperCase()).padStart(3, " ");
-            const char = v >= 32 && v <= 126 ? String.fromCharCode(v) : ".";
-            return { dec, hex, char };
-          });
+  document.getElementById("writeMemoryBtn").onclick = () => {
+    const addr = parseAddress(document.getElementById("writeAddress").value);
+    const typefunction = document.getElementById("writeType").value;
+    const val = document.getElementById("writeValue").value;
 
-          const decLine = "[DEC]  " + padded.map((p) => p.dec).join(" ");
-          const hexLine = "[HEX]  " + padded.map((p) => p.hex).join(" ");
-          const charLine =
-            "[CHAR] " + padded.map((p) => "  " + p.char).join(" ");
-
-          document.getElementById("output").textContent =
-            decLine + "\n" + hexLine + "\n" + charLine;
+    try {
+      chrome.devtools.inspectedWindow.eval(
+        `window.memWrapper.${typefunction}(${addr}, ${
+          isNaN(val) ? val : Number(val)
+        })`,
+        (result, exceptionInfo) => {
+          if (exceptionInfo) {
+            document.getElementById(
+              "writeResult"
+            ).textContent = `Error: ${exceptionInfo.value}`;
+          } else {
+            document.getElementById("writeResult").textContent = "Write done";
+          }
         }
-      }
-    );
+      );
+    } catch (e) {
+      document.getElementById("readResult").textContent = `Error: ${e.message}`;
+    }
+  };
+
+  document.getElementById("readStringBtn").onclick = () => {
+    const addr = parseAddress(document.getElementById("stringAddress").value);
+
+    try {
+      chrome.devtools.inspectedWindow.eval(
+        `window.memWrapper.readString(${addr})`,
+        (result, exceptionInfo) => {
+          if (exceptionInfo) {
+            document.getElementById(
+              "stringOutput"
+            ).textContent = `Error: ${exceptionInfo.value}`;
+          } else {
+            document.getElementById("stringOutput").textContent = result;
+          }
+        }
+      );
+    } catch (e) {
+      document.getElementById(
+        "stringOutput"
+      ).textContent = `Error: ${e.message}`;
+    }
+  };
+
+  document.getElementById("writeStringBtn").onclick = () => {
+    const addr = parseAddress(document.getElementById("stringAddress").value);
+    const val = document.getElementById("stringValue").value;
+
+    try {
+      chrome.devtools.inspectedWindow.eval(
+        `window.memWrapper.writeString(${addr}, '${val}')`,
+        (result, exceptionInfo) => {
+          if (exceptionInfo) {
+            document.getElementById(
+              "stringOutput"
+            ).textContent = `Error: ${exceptionInfo.value}`;
+          } else {
+            document.getElementById("stringOutput").textContent = "Write done";
+          }
+        }
+      );
+    } catch (e) {
+      document.getElementById(
+        "stringOutput"
+      ).textContent = `Error: ${e.message}`;
+    }
+  };
+
+  document.getElementById("copyMemoryBtn").onclick = () => {
+    const src = parseAddress(document.getElementById("copySrc").value);
+    const dst = parseAddress(document.getElementById("copyDst").value);
+    const len = parseInt(document.getElementById("copyLen").value);
+
+    try {
+      chrome.devtools.inspectedWindow.eval(
+        `window.memWrapper.writeBytes(${dst}, window.memWrapper.readBytes(${src}, ${len}))`,
+        (result, exceptionInfo) => {
+          if (exceptionInfo) {
+            document.getElementById(
+              "copyOutput"
+            ).textContent = `Error: ${exceptionInfo.value}`;
+          } else {
+            document.getElementById("copyOutput").textContent = "Copy done";
+          }
+        }
+      );
+    } catch (e) {
+      document.getElementById("copyOutput").textContent = `Error: ${e.message}`;
+    }
+  };
+
+  document.getElementById("searchMemoryBtn").onclick = () => {
+    const value = document.getElementById("searchValue").value;
+    const typefunction = document.getElementById("searchType").value;
+    let result = [];
+
+    let instruction;
+
+    if (typefunction.startsWith("searchString")) {
+      instruction = `window.memWrapper.${typefunction}('${value}')`;
+    } else if (typefunction.includes("64")) {
+      instruction = `window.memWrapper.${typefunction}(${BigInt(value)})`;
+    } else {
+      instruction = `window.memWrapper.${typefunction}(${Number(value)})`;
+    }
+
+    try {
+      chrome.devtools.inspectedWindow.eval(
+        instruction,
+        (result, exceptionInfo) => {
+          if (exceptionInfo) {
+            document.getElementById(
+              "searchOutput"
+            ).textContent = `Error: ${exceptionInfo.value}`;
+          } else {
+            document.getElementById("searchOutput").textContent = result
+              .map((a) => "0x" + a.toString(16) + "\t" + a)
+              .join("\n");
+          }
+        }
+      );
+    } catch (e) {
+      document.getElementById(
+        "searchOutput"
+      ).textContent = `Error: ${e.message}`;
+    }
   };
 });
