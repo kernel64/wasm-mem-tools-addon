@@ -38,7 +38,7 @@ The DevTools panel provides:
 ## Installation
 
 1. Download the extension from:
-   - [Chrome Web Store](#) *(coming soon)*
+   - [Chrome Web Store]([#](https://chromewebstore.google.com/detail/wasm-memory-tools/ibnlkehbankkledbceckejaihgpgklkj?pli=1)) 
    - [Firefox Add-ons](#) *(coming soon)*
 2. Or install manually for development:
    - Clone this repo
